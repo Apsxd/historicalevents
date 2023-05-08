@@ -1,0 +1,27 @@
+{
+    "name": "historicalevents",
+    "version": "1.0.0",
+    "description": "Bot that sends historical facts of the day",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node src/index.js"
+    },
+    "keywords": [
+        "historicalevents",
+        "history",
+        "bot",
+        "node-telegram-bot-api",
+        "factshistory"
+    ],
+    "author": "leviobrabo",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.4.0",
+        "cheerio": "^1.0.0-rc.12",
+        "cron": "^2.3.0",
+        "dotenv": "^16.0.3",
+        "mongoose": "^7.1.0",
+        "translate-google": "^1.5.0"
+    }
+}

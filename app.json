@@ -1,0 +1,31 @@
+{
+    "name": "Historical Events",
+    "description": "'Historical Events' is a Bot that sends historical events of each day of the month",
+    "repository": "https://github.com/leviobrabo/historicalevents",
+    "logo": "https://i.imgur.com/XXxV74z.jpeg",
+    "keywords": ["node", "fatos_históricos", "telegrambot"],
+    "website": "https://github.com/leviobrabo/historicalevents",
+    "success_url": "https://t.me/HistoricalEvents_bot",
+    "env": {
+        "TELEGRAM_API": {
+            "description": "Make a bot at BotFather http://telegram.dog/BotFather and get the token of your bot",
+            "value": "",
+            "required": true
+        },
+        "DB_STRING": {
+            "description": "Create database ate MongoDB Atlas https://www.mongodb.com/ create new cluster and get url for connection.",
+            "value": "",
+            "required": true
+        },
+        "groupId": {
+            "description": "Group ID LOG Telegram.",
+            "value": "",
+            "required": true
+        },
+        "DEV_USERS": {
+            "description": "Developers id ",
+            "value": "",
+            "required": true
+        }
+    }
+}
