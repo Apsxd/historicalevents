@@ -588,6 +588,57 @@ const job = new CronJob(
     "America/Sao_Paulo"
 );
 
+const channelId = process.env.channelId;
+
+async function getHistoricalEventsEn() {
+    const today = new Date();
+    day = today.getDate();
+    month = today.getMonth() + 1;
+
+    const response = await axios.get(
+        `https://www.educabras.com/hoje_na_historia/buscar/${day}/${month}`
+    );
+    const $ = cheerio.load(response.data);
+    const eventDiv = $(".nascido_neste_dia");
+    let eventText = eventDiv.text().trim();
+
+    eventText = await translate(eventText, { to: "en" });
+
+    return eventText;
+}
+
+async function sendHistoricalEventsChannel(channelId) {
+    const events = await getHistoricalEventsEn();
+    if (events) {
+        const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
+        const translatedMessage = await translate(message, { to: "en" });
+        bot.sendMessage(channelId, translatedMessage, {
+            parse_mode: "HTML",
+        });
+    } else {
+        const errorMessage = "<b>There are no historical events for today.</b>";
+        const translatedErrorMessage = await translate(errorMessage, {
+            to: "en",
+        });
+        bot.sendMessage(channelId, translatedErrorMessage, {
+            parse_mode: "HTML",
+        });
+    }
+}
+
+const channelEnJob = new CronJob(
+    "0 5 * * *",
+    function () {
+        sendHistoricalEventsChannel(channelId);
+        console.log(`Message successfully sent to the channel ${channelId}`);
+    },
+    null,
+    true,
+    "America/New_York"
+);
+
+channelEnJob.start();
+
 exports.initHandler = () => {
     return bot;
 };
