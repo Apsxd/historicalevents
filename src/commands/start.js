@@ -4,7 +4,7 @@ function startCommand(bot, message) {
     }
     const firstName = message.from.first_name;
 
-    const message_start = `Hello, <b>${firstName}</b>! \n\nI am <b>Historical Events</b>, I am a bot that sends a daily message with historical events followed on the day the message was sent. \n\nAdd me to your group.\n\n📢 <b>Official Channel:</b> <a href="https://t.me/today_in_historys">Today in History</a>\n📢 Command /help`;
+    const message_start = `Hello, <b>${firstName}</b>! \n\nI am <b>Historical Facts</b>, I am a bot that sends a daily message with historical events that happened on the day the message was sent.\n\nThe sending of the message in the private chat is automatic, if you choose not to receive, type /sendoff and if you want to receive again type /sendon\n\n<b>The message is sent every day at 8 am</b>\n\nAdd me to your group to receive messages there. \n\n<b>Commands:</b> /help`;
     const options_start = {
         parse_mode: "HTML",
         disable_web_page_preview: true,

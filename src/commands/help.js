@@ -4,7 +4,7 @@ function helpCommand(bot, message) {
     }
 
     const text =
-        "Hello! I'm a bot programmed to send historical facts every day at predetermined times of 8am. \n\nAlso, I have some awesome commands that you might find useful. Feel free to interact with me and find out more about the world around us! \n\n<b>Just click on one of them:</b>";
+        "Hello! I'm a bot programmed to send historical facts every day at the predetermined times of 8:00 am. \n\nIn addition, I have some amazing commands that may be useful for you. Feel free to interact with me and find out more about the world around us! \n\n<b>Just click on one of them:</b>";
     const options = {
         parse_mode: "HTML",
         reply_markup: {
@@ -31,7 +31,11 @@ function helpCommand(bot, message) {
         const messageId = callbackQuery.message.message_id;
 
         if (callbackQuery.data === "commands") {
-            const commands = ["/photoshist - Photos of historical facts 🙂"];
+            const commands = [
+                "/photoshist - Photos of historical facts 🙂",
+                "/sendon - You will receive the daily message at 8 am",
+                "/sendoff - You will not receive the daily message at 8 am",
+            ];
             await bot.editMessageText(
                 "<b>Command List:</b> \n\n" + commands.join("\n"),
                 {

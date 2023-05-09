@@ -131,6 +131,7 @@ bot.on("message", async (msg) => {
                 username: msg.from.username,
                 firstname: msg.from.first_name,
                 lastname: msg.from.last_name,
+                msg_private: true,
             });
 
             await user.save();
@@ -353,7 +354,7 @@ const channelJob = new CronJob(
     },
     null,
     true,
-    "America/Sao_Paulo"
+    "America/New_York"
 );
 
 channelJob.start();
@@ -617,6 +618,107 @@ const job = new CronJob(
     true,
     "America/Sao_Paulo"
 );
+
+async function sendHistoricalEventsUser(userId) {
+    const events = await getHistoricalEvents();
+    const inlineKeyboard = {
+        inline_keyboard: [
+            [
+                {
+                    text: "📢 Canal Oficial",
+                    url: "https://t.me/hoje_na_historia",
+                },
+            ],
+        ],
+    };
+
+    if (events) {
+        const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
+        bot.sendMessage(userId, message, {
+            parse_mode: "HTML",
+            reply_markup: inlineKeyboard,
+        });
+    } else {
+        bot.sendMessage(
+            userId,
+            "<b>There are no historical events for today.</b>",
+            {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+            }
+        );
+    }
+}
+
+const userJob = new CronJob(
+    "27 17 * * *",
+    async function () {
+        const users = await UserModel.find({ msg_private: true });
+        for (const user of users) {
+            const userId = user.user_id;
+            sendHistoricalEventsUser(userId);
+            console.log(`Message successfully sent to user ${userId}`);
+        }
+    },
+    null,
+    true,
+    "America/Sao_Paulo"
+);
+
+userJob.start();
+
+bot.onText(/\/sendoff/, async (msg) => {
+    if (msg.chat.type !== "private") {
+        return;
+    }
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const user = await UserModel.findOne({ user_id: userId });
+    if (!user.msg_private) {
+        bot.sendMessage(
+            chatId,
+            "You have already deactivated the function of receiving the message in the private chat."
+        );
+        return;
+    }
+    await UserModel.findOneAndUpdate(
+        { user_id: userId },
+        { msg_private: false },
+        { new: true }
+    );
+    console.log(`User ${userId} updated to not receive private message`);
+
+    bot.sendMessage(
+        chatId,
+        "Private messages disabled. You will not receive a message at 8 am every day."
+    );
+});
+
+bot.onText(/\/sendon/, async (msg) => {
+    if (msg.chat.type !== "private") {
+        return;
+    }
+    const userId = msg.from.id;
+    const user = await UserModel.findOne({ user_id: userId });
+    if (user.msg_private) {
+        bot.sendMessage(
+            msg.chat.id,
+            "You have already activated the function of receiving the message in the private chat."
+        );
+        return;
+    }
+    await UserModel.findOneAndUpdate(
+        { user_id: userId },
+        { msg_private: true },
+        { new: true }
+    );
+    console.log(`User ${userId} updated to receive private message`);
+
+    bot.sendMessage(
+        msg.chat.id,
+        "Private message enabled. You will receive message at 8 am every day about historical facts."
+    );
+});
 
 exports.initHandler = () => {
     return bot;
