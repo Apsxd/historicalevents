@@ -627,14 +627,14 @@ async function sendHistoricalEventsChannel(channelId) {
 }
 
 const channelJob = new CronJob(
-    "57 8 * * *",
+    "5 10 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 
 channelJob.start();
