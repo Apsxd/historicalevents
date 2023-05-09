@@ -593,7 +593,7 @@ async function sendStatus() {
     const numUsers = await UserModel.countDocuments();
     const numChats = await ChatModel.countDocuments();
     await bot.editMessageText(
-        `#Historicalevents_bot #Status\n\nStatus: ON\nPing: \`${m_s}ms\`\nUptime: \`${uptime_formatted}\`\nUsers: \`${numUsers}\`\nChats: \`${numChats}\``,
+        `#Historicaleventsbot #Status\n\nStatus: ON\nPing: \`${m_s}ms\`\nUptime: \`${uptime_formatted}\`\nUsers: \`${numUsers}\`\nChats: \`${numChats}\``,
         {
             chat_id: replied.chat.id,
             message_id: replied.message_id,
@@ -615,7 +615,7 @@ function timeFormatter(seconds) {
 }
 
 const job = new CronJob(
-    "02 32 12 * * *",
+    "02 34 12 * * *",
     sendStatus,
     null,
     true,
