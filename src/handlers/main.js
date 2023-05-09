@@ -203,11 +203,7 @@ bot.on("new_chat_members", async (msg) => {
                         inline_keyboard: [
                             [
                                 {
-                                    text: "🇧🇷 Official Channel (PT-BR)",
-                                    url: "https://t.me/hoje_na_historia",
-                                },
-                                {
-                                    text: "🇺🇸 Official Channel (EN-US)",
+                                    text: "Official Channel 🇺🇸",
                                     url: "https://t.me/today_in_historys",
                                 },
                             ],

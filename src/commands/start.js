@@ -4,7 +4,7 @@ function startCommand(bot, message) {
     }
     const firstName = message.from.first_name;
 
-    const message_start = `Hello, <b>${firstName}</b>! \n\nI am <b>Historical Events</b>, I am a bot that sends a daily message with historical events followed on the day the message was sent. \n\nAdd me to your group.\n\n📢 <b>Official Channel:</b> <a href="https://t.me/today_in_historys">Today in History</a>`;
+    const message_start = `Hello, <b>${firstName}</b>! \n\nI am <b>Historical Events</b>, I am a bot that sends a daily message with historical events followed on the day the message was sent. \n\nAdd me to your group.\n\n📢 <b>Official Channel:</b> <a href="https://t.me/today_in_historys">Today in History</a>\n📢 Command /help`;
     const options_start = {
         parse_mode: "HTML",
         disable_web_page_preview: true,
@@ -28,11 +28,7 @@ function startCommand(bot, message) {
                 ],
                 [
                     {
-                        text: "🇧🇷 Official Channel (PT-BR)",
-                        url: "https://t.me/hoje_na_historia",
-                    },
-                    {
-                        text: "🇺🇸 Official Channel (EN-US)",
+                        text: "Official Channel 🇺🇸",
                         url: "https://t.me/today_in_historys",
                     },
                 ],
