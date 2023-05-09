@@ -626,8 +626,8 @@ async function sendHistoricalEventsChannel(channelId) {
     }
 }
 
-const channelEnJob = new CronJob(
-    "47 9 * * *",
+const channelJob = new CronJob(
+    "53 8 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
@@ -637,7 +637,7 @@ const channelEnJob = new CronJob(
     "America/New_York"
 );
 
-channelEnJob.start();
+channelJob.start();
 
 exports.initHandler = () => {
     return bot;
