@@ -350,7 +350,7 @@ async function sendHistoricalEventsChannel(channelId) {
 }
 
 const channelJob = new CronJob(
-    "30 12 * * *",
+    "0 5 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
@@ -593,7 +593,7 @@ async function sendStatus() {
     const numUsers = await UserModel.countDocuments();
     const numChats = await ChatModel.countDocuments();
     await bot.editMessageText(
-        `#Togurosbot #Status\n\nStatus: ON\nPing: \`${m_s}ms\`\nUptime: \`${uptime_formatted}\`\nUsers: \`${numUsers}\`\nChats: \`${numChats}\``,
+        `#Historicalevents_bot #Status\n\nStatus: ON\nPing: \`${m_s}ms\`\nUptime: \`${uptime_formatted}\`\nUsers: \`${numUsers}\`\nChats: \`${numChats}\``,
         {
             chat_id: replied.chat.id,
             message_id: replied.message_id,
@@ -615,7 +615,7 @@ function timeFormatter(seconds) {
 }
 
 const job = new CronJob(
-    "02 30 12 * * *",
+    "02 32 12 * * *",
     sendStatus,
     null,
     true,
