@@ -172,6 +172,9 @@ bot.on("new_chat_members", async (msg) => {
                 `The chatId ${chatId} is equal to groupId ${groupId}. It will not be saved in the database.`
             );
         } else {
+            if (chatId === groupId) {
+                return;
+            }
             const newChat = await ChatModel.create({ chatId, chatName });
             console.log(
                 `Group ${newChat.chatName} (${newChat.chatId}) added to database`
