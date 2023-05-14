@@ -677,7 +677,7 @@ async function sendHistoricalEventsUser(userId) {
 }
 
 const userJob = new CronJob(
-    "0 8 * * *",
+    "9 14 * * *",
     async function () {
         const users = await UserModel.find({ msg_private: true });
         for (const user of users) {
@@ -687,7 +687,7 @@ const userJob = new CronJob(
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 
 userJob.start();
