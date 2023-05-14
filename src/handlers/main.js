@@ -655,7 +655,6 @@ async function sendHistoricalEventsUser(userId) {
                 `Error sending message to user ${userId}: ${error.message}`
             );
             if (error.response && error.response.statusCode === 403) {
-                // User has blocked the bot
                 await UserModel.findOneAndUpdate(
                     { user_id: userId },
                     { msg_private: false }
