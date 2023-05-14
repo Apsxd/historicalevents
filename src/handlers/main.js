@@ -635,8 +635,8 @@ async function sendHistoricalEventsUser(userId) {
         inline_keyboard: [
             [
                 {
-                    text: "📢 Canal Oficial",
-                    url: "https://t.me/hoje_na_historia",
+                    text: "📢 Official Channel",
+                    url: "https://t.me/today_in_historys",
                 },
             ],
         ],
@@ -644,10 +644,27 @@ async function sendHistoricalEventsUser(userId) {
 
     if (events) {
         const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
-        bot.sendMessage(userId, message, {
-            parse_mode: "HTML",
-            reply_markup: inlineKeyboard,
-        });
+        try {
+            await bot.sendMessage(userId, message, {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+            });
+            console.log(`Message successfully sent to user ${userId}`);
+        } catch (error) {
+            console.log(
+                `Error sending message to user ${userId}: ${error.message}`
+            );
+            if (error.response && error.response.statusCode === 403) {
+                // User has blocked the bot
+                await UserModel.findOneAndUpdate(
+                    { user_id: userId },
+                    { msg_private: false }
+                );
+                console.log(
+                    `User ${userId} has blocked the bot and been unsubscribed from private messages`
+                );
+            }
+        }
     } else {
         bot.sendMessage(
             userId,
@@ -661,18 +678,17 @@ async function sendHistoricalEventsUser(userId) {
 }
 
 const userJob = new CronJob(
-    "0 8 * * *",
+    "31 13 * * *",
     async function () {
         const users = await UserModel.find({ msg_private: true });
         for (const user of users) {
             const userId = user.user_id;
-            sendHistoricalEventsUser(userId);
-            console.log(`Message successfully sent to user ${userId}`);
+            await sendHistoricalEventsUser(userId);
         }
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 
 userJob.start();
