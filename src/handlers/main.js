@@ -850,7 +850,7 @@ async function getDeathsOfTheDay() {
 
     try {
         const response = await axios.get(
-            `https://en.wikipedia.org/api/rest_v1/feed/onthisday/deaths/${month}/${day}`,
+            `https://pt.wikipedia.org/api/rest_v1/feed/onthisday/deaths/${month}/${day}`,
             {
                 headers: {
                     accept: 'application/json; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/onthisday/0.3.3"',
@@ -866,14 +866,15 @@ async function getDeathsOfTheDay() {
                 const name = `<b>${death.text}</b>`;
                 const info =
                     death.pages?.[0]?.extract || "Information not available.";
-                const date = death.year || "Unknown date.";
+                const date = death.year || "unknown date.";
                 const deathMessage = `<i>${
                     index + 1
                 }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}\n<b>Date of death:</b> ${date}`;
                 messageParts.push(deathMessage);
             });
 
-            let message = "<b>ℹ️ Information about deaths of the day:</b>\n\n";
+            let message =
+                "<b>ℹ️ Information about the dead of the day:</b>\n\n";
 
             message += messageParts.join("\n\n");
 
@@ -882,110 +883,19 @@ async function getDeathsOfTheDay() {
             await sendMessageToChannel(message);
         } else {
             console.log(
-                "No information available about deaths for the current day."
+                "There is no information about dead for the current day."
             );
         }
     } catch (error) {
-        console.error("Error retrieving information:", error.message);
+        console.error("Error getting information:", error.message);
     }
 }
-const death = new CronJob("7 14 * * *", getDeathsOfTheDay);
+
+const death = new CronJob(
+    "00 15 13 * * *",
+    getDeathsOfTheDay,
+    null,
+    true,
+    "America/New_York"
+);
 death.start();
-
-async function getBirthsOfTheDay() {
-    const today = new Date();
-    const day = today.getDate();
-    const month = today.getMonth() + 1;
-
-    try {
-        const response = await axios.get(
-            `https://en.wikipedia.org/api/rest_v1/feed/onthisday/births/${month}/${day}`,
-            {
-                headers: {
-                    accept: 'application/json; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/onthisday/0.3.3"',
-                },
-            }
-        );
-
-        if (response.data.births.length > 0) {
-            const births = response.data.births.slice(0, 5);
-            const messageParts = [];
-
-            births.forEach((birth, index) => {
-                const name = `<b>${birth.text}</b>`;
-                const info =
-                    birth.pages?.[0]?.extract || "Information not available.";
-                const date = birth.year || "Unknown date.";
-                const birthMessage = `<i>${
-                    index + 1
-                }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}\n<b>Date of birth:</b> ${date}`;
-                messageParts.push(birthMessage);
-            });
-
-            let message = "<b>ℹ️ Information about births today:</b>\n\n";
-
-            message += messageParts.join("\n\n");
-
-            message += "\n\n🎂 Did you know that?";
-
-            await sendMessageToChannel(message);
-        } else {
-            console.log("No information available about births today.");
-        }
-    } catch (error) {
-        console.error("Error retrieving information:", error.message);
-    }
-}
-
-const birth = new CronJob("00 00 18 * * *", getBirthsOfTheDay);
-birth.start();
-
-async function getHolidaysOfTheDay() {
-    const today = new Date();
-    const day = today.getDate();
-    const month = today.getMonth() + 1;
-
-    try {
-        const response = await axios.get(
-            `https://en.wikipedia.org/api/rest_v1/feed/onthisday/holidays/${month}/${day}`,
-            {
-                headers: {
-                    accept: 'application/json; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/onthisday/0.3.3"',
-                },
-            }
-        );
-
-        if (response.data.holidays.length > 0) {
-            const holidays = response.data.holidays.slice(0, 5);
-            const messageParts = [];
-
-            holidays.forEach((holiday, index) => {
-                const name = `<b>${holiday.text}</b>`;
-                const info =
-                    holiday.pages?.[0]?.extract || "Information not available.";
-                const holidayMessage = `<i>${
-                    index + 1
-                }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}`;
-                messageParts.push(holidayMessage);
-            });
-
-            let message =
-                "<b>ℹ️ Information about world holidays of the day:</b>\n\n";
-
-            message += messageParts.join("\n\n");
-
-            message += "\n\n🌍 Did you know that?";
-
-            await sendMessageToChannel(message);
-        } else {
-            console.log(
-                "No information available about world holidays for the current day."
-            );
-        }
-    } catch (error) {
-        console.error("Error retrieving information:", error.message);
-    }
-}
-
-const holiday = new CronJob("00 00 20 * * *", getHolidaysOfTheDay);
-holiday.start();
