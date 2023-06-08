@@ -890,7 +890,7 @@ async function getDeathsOfTheDay() {
         console.error("Error retrieving information:", error.message);
     }
 }
-const death = new CronJob("00 00 14 * * *", getDeathsOfTheDay);
+const death = new CronJob("00 5 13 * * *", getDeathsOfTheDay);
 death.start();
 
 async function getBirthsOfTheDay() {
