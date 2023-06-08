@@ -768,7 +768,6 @@ bot.onText(/\/sendgp/, async (msg, match) => {
     let no_success = 0;
     let block_num = 0;
 
-    // Check if the message is a reply and forward it instead of sending a new message
     if (msg.reply_to_message) {
         const replyMsg = msg.reply_to_message;
         for (const { chatId } of ulist) {
@@ -890,7 +889,7 @@ async function getDeathsOfTheDay() {
         console.error("Error retrieving information:", error.message);
     }
 }
-const death = new CronJob("00 5 13 * * *", getDeathsOfTheDay);
+const death = new CronJob("7 14 * * *", getDeathsOfTheDay);
 death.start();
 
 async function getBirthsOfTheDay() {
