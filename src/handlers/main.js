@@ -946,8 +946,8 @@ async function getBirthsOfTheDay() {
 }
 
 const birth = new CronJob(
-    "00 00 17 * * *",
-    getDeathsOfTheDay,
+    "00 25 18 * * *",
+    getBirthsOfTheDay,
     null,
     true,
     "America/New_York"
@@ -1003,7 +1003,7 @@ async function getHolidaysOfTheDay() {
 
 const holiday = new CronJob(
     "00 00 19 * * *",
-    getDeathsOfTheDay,
+    getHolidaysOfTheDay,
     null,
     true,
     "America/New_York"
