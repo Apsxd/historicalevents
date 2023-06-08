@@ -850,7 +850,7 @@ async function getDeathsOfTheDay() {
 
     try {
         const response = await axios.get(
-            `https://pt.wikipedia.org/api/rest_v1/feed/onthisday/deaths/${month}/${day}`,
+            `https://en.wikipedia.org/api/rest_v1/feed/onthisday/deaths/${month}/${day}`,
             {
                 headers: {
                     accept: 'application/json; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/onthisday/0.3.3"',
@@ -892,7 +892,7 @@ async function getDeathsOfTheDay() {
 }
 
 const death = new CronJob(
-    "00 15 13 * * *",
+    "00 17 13 * * *",
     getDeathsOfTheDay,
     null,
     true,
