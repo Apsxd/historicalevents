@@ -892,7 +892,7 @@ async function getDeathsOfTheDay() {
 }
 
 const death = new CronJob(
-    "00 17 13 * * *",
+    "00 00 13 * * *",
     getDeathsOfTheDay,
     null,
     true,
@@ -946,7 +946,7 @@ async function getBirthsOfTheDay() {
 }
 
 const birth = new CronJob(
-    "00 25 18 * * *",
+    "00 00 17 * * *",
     getBirthsOfTheDay,
     null,
     true,
@@ -1009,3 +1009,42 @@ const holiday = new CronJob(
     "America/New_York"
 );
 holiday.start();
+
+async function sendHistoricalEvent() {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
+
+    try {
+        const response = await axios.get(
+            `https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`
+        );
+        const events = response.data.events;
+        const randomIndex = Math.floor(Math.random() * events.length);
+        const event = events[randomIndex];
+
+        const caption = event.text;
+
+        if (event.pages && event.pages[0].thumbnail) {
+            const photoUrl = event.pages[0].thumbnail.source;
+            await bot.sendPhoto(channelId, photoUrl, { caption });
+        } else {
+            await bot.sendMessage(channelId, caption);
+        }
+
+        console.log("Historical event sent successfully.");
+    } catch (error) {
+        console.error("Failed to send historical event:", error);
+    }
+}
+
+const dar = new CronJob(
+    "00 00 20 * * *",
+    function () {
+        sendHistoricalEvent();
+    },
+    null,
+    true,
+    "America/New_York"
+);
+dar.start();
