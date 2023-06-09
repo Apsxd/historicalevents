@@ -1039,7 +1039,7 @@ async function sendHistoricalEvent() {
 }
 
 const dar = new CronJob(
-    "00 00 20 * * *",
+    "00 00 10 * * *",
     function () {
         sendHistoricalEvent();
     },
