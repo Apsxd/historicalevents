@@ -138,9 +138,8 @@ bot.on("message", async (msg) => {
             console.log(`User ${msg.from.id} saved in the database.`);
 
             const message = `#HistoricalEvents_bot #New_User
-        <b>User:</b> <a href="tg://user?id=${user.user_id}">${
-                user.firstname
-            }</a>
+        <b>User:</b> <a href="tg://user?id=${user.user_id}">${user.firstname
+                }</a>
         <b>ID:</b> <code>${user.user_id}</code>
         <b>Username:</b> ${user.username ? `@${user.username}` : "Uninformed"}`;
             bot.sendMessage(groupId, message, { parse_mode: "HTML" });
@@ -681,7 +680,7 @@ async function sendHistoricalEventsUser(userId) {
 }
 
 const userJob = new CronJob(
-    "0 8 * * *",
+    "17 8 * * *",
     async function () {
         const users = await UserModel.find({ msg_private: true });
         for (const user of users) {
@@ -867,9 +866,8 @@ async function getDeathsOfTheDay() {
                 const info =
                     death.pages?.[0]?.extract || "Information not available.";
                 const date = death.year || "unknown date.";
-                const deathMessage = `<i>${
-                    index + 1
-                }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}\n<b>Date of death:</b> ${date}`;
+                const deathMessage = `<i>${index + 1
+                    }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}\n<b>Date of death:</b> ${date}`;
                 messageParts.push(deathMessage);
             });
 
@@ -924,9 +922,8 @@ async function getBirthsOfTheDay() {
                 const info =
                     birth.pages?.[0]?.extract || "Information not available.";
                 const date = birth.year || "Date unknown.";
-                const birthMessage = `<i>${
-                    index + 1
-                }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}\n<b>Date of birth:</b> ${date}`;
+                const birthMessage = `<i>${index + 1
+                    }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}\n<b>Date of birth:</b> ${date}`;
                 messageParts.push(birthMessage);
             });
 
@@ -977,9 +974,8 @@ async function getHolidaysOfTheDay() {
                 const name = `<b>${holiday.text}</b>`;
                 const info =
                     holiday.pages?.[0]?.extract || "Information not available.";
-                const holidayMessage = `<i>${
-                    index + 1
-                }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}`;
+                const holidayMessage = `<i>${index + 1
+                    }.</i> <b>Name:</b> ${name}\n<b>Information:</b> ${info}`;
                 messageParts.push(holidayMessage);
             });
 
