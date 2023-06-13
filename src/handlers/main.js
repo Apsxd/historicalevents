@@ -282,45 +282,53 @@ async function getHistoricalEvents() {
 
     return eventText;
 }
-
 async function sendHistoricalEventsGroup(chatId) {
-    const events = await getHistoricalEvents();
-    const inlineKeyboard = {
-        inline_keyboard: [
-            [
-                {
-                    text: "📢 Official Channel",
-                    url: "https://t.me/today_in_historys",
-                },
+    try {
+        const events = await getHistoricalEvents();
+        const inlineKeyboard = {
+            inline_keyboard: [
+                [
+                    {
+                        text: "📢 Official Channel",
+                        url: "https://t.me/today_in_historys",
+                    },
+                ],
             ],
-        ],
-    };
+        };
 
-    if (events) {
-        const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
-        bot.sendMessage(chatId, message, {
-            parse_mode: "HTML",
-            reply_markup: inlineKeyboard,
-        });
-    } else {
-        const errorMessage = "<b>There are no historical events for today.</b>";
-        bot.sendMessage(chatId, errorMessage, {
-            parse_mode: "HTML",
-            reply_markup: inlineKeyboard,
-        });
+        if (events) {
+            const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
+            await bot.sendMessage(chatId, message, {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+            });
+            console.log(`Message sent successfully to group ${chatId}`);
+        } else {
+            const errorMessage = "<b>There are no historical events for today.</b>";
+            await bot.sendMessage(chatId, errorMessage, {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+            });
+            console.log(`Empty message sent to group ${chatId}`);
+        }
+    } catch (error) {
+        console.error(`Error sending message to group ${chatId}:`, error);
     }
 }
 
 const morningJob = new CronJob(
-    "20 11 * * *",
+    "00 9 * * *",
     async function () {
-        const chatModels = await ChatModel.find({});
-        for (const chatModel of chatModels) {
-            const chatId = chatModel.chatId;
-            if (chatId !== groupId) {
-                await sendHistoricalEventsGroup(chatId);
-                console.log(`Message sent successfully to group ${chatId}`);
+        try {
+            const chatModels = await ChatModel.find({});
+            for (const chatModel of chatModels) {
+                const chatId = chatModel.chatId;
+                if (chatId !== groupId) {
+                    await sendHistoricalEventsGroup(chatId);
+                }
             }
+        } catch (error) {
+            console.error("Error retrieving chat models:", error);
         }
     },
     null,
@@ -329,6 +337,7 @@ const morningJob = new CronJob(
 );
 
 morningJob.start();
+
 
 const channelId = process.env.channelId;
 
@@ -348,7 +357,7 @@ async function sendHistoricalEventsChannel(channelId) {
 }
 
 const channelJob = new CronJob(
-    "00 10 11 * * *",
+    "00 00 6 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
@@ -1027,7 +1036,7 @@ async function sendHistoricalEvent() {
 }
 
 const dar = new CronJob(
-    "00 50 11 * * *",
+    "00 00 11 * * *",
     function () {
         sendHistoricalEvent();
     },
