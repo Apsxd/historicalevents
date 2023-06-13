@@ -312,7 +312,7 @@ async function sendHistoricalEventsGroup(chatId) {
 }
 
 const morningJob = new CronJob(
-    "25 9 * * *",
+    "50 10 * * *",
     async function () {
         const chatModels = await ChatModel.find({});
         for (const chatModel of chatModels) {
@@ -325,7 +325,7 @@ const morningJob = new CronJob(
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 
 morningJob.start();
@@ -348,14 +348,14 @@ async function sendHistoricalEventsChannel(channelId) {
 }
 
 const channelJob = new CronJob(
-    "20 9 * * *",
+    "00 50 10 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 
 channelJob.start();
