@@ -356,7 +356,7 @@ async function sendHistoricalEventsChannel(channelId) {
 }
 
 const channelJob = new CronJob(
-    "17 8 * * *",
+    "30 8 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
