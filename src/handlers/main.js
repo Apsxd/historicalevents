@@ -298,17 +298,13 @@ async function sendHistoricalEventsGroup(chatId) {
 
     if (events) {
         const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
-        const translatedMessage = await translate(message, { to: "en" });
-        bot.sendMessage(chatId, translatedMessage, {
+        bot.sendMessage(chatId, message, {
             parse_mode: "HTML",
             reply_markup: inlineKeyboard,
         });
     } else {
         const errorMessage = "<b>There are no historical events for today.</b>";
-        const translatedErrorMessage = await translate(errorMessage, {
-            to: "en",
-        });
-        bot.sendMessage(chatId, translatedErrorMessage, {
+        bot.sendMessage(chatId, errorMessage, {
             parse_mode: "HTML",
             reply_markup: inlineKeyboard,
         });
@@ -316,7 +312,7 @@ async function sendHistoricalEventsGroup(chatId) {
 }
 
 const morningJob = new CronJob(
-    "52 8 * * *",
+    "58 8 * * *",
     async function () {
         const chatModels = await ChatModel.find({});
         for (const chatModel of chatModels) {
@@ -340,23 +336,19 @@ async function sendHistoricalEventsChannel(channelId) {
     const events = await getHistoricalEvents();
     if (events) {
         const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
-        const translatedMessage = await translate(message, { to: "en" });
-        bot.sendMessage(channelId, translatedMessage, {
+        bot.sendMessage(channelId, message, {
             parse_mode: "HTML",
         });
     } else {
         const errorMessage = "<b>There are no historical events for today.</b>";
-        const translatedErrorMessage = await translate(errorMessage, {
-            to: "en",
-        });
-        bot.sendMessage(channelId, translatedErrorMessage, {
+        bot.sendMessage(channelId, errorMessage, {
             parse_mode: "HTML",
         });
     }
 }
 
 const channelJob = new CronJob(
-    "48 8 * * *",
+    "52 8 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
