@@ -312,7 +312,7 @@ async function sendHistoricalEventsGroup(chatId) {
 }
 
 const morningJob = new CronJob(
-    "55 10 * * *",
+    "20 11 * * *",
     async function () {
         const chatModels = await ChatModel.find({});
         for (const chatModel of chatModels) {
@@ -348,7 +348,7 @@ async function sendHistoricalEventsChannel(channelId) {
 }
 
 const channelJob = new CronJob(
-    "00 55 10 * * *",
+    "00 10 11 * * *",
     function () {
         sendHistoricalEventsChannel(channelId);
         console.log(`Message successfully sent to the channel ${channelId}`);
@@ -672,7 +672,7 @@ async function sendHistoricalEventsUser(userId) {
 }
 
 const userJob = new CronJob(
-    "00 8 * * *",
+    "00 9 * * *",
     async function () {
         const users = await UserModel.find({ msg_private: true });
         for (const user of users) {
@@ -682,7 +682,7 @@ const userJob = new CronJob(
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 
 userJob.start();
@@ -882,11 +882,11 @@ async function getDeathsOfTheDay() {
 }
 
 const death = new CronJob(
-    "00 00 13 * * *",
+    "00 00 14 * * *",
     getDeathsOfTheDay,
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 death.start();
 
@@ -935,11 +935,11 @@ async function getBirthsOfTheDay() {
 }
 
 const birth = new CronJob(
-    "00 00 17 * * *",
+    "00 00 18 * * *",
     getBirthsOfTheDay,
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 birth.start();
 
@@ -990,11 +990,11 @@ async function getHolidaysOfTheDay() {
 }
 
 const holiday = new CronJob(
-    "00 00 19 * * *",
+    "00 00 20 * * *",
     getHolidaysOfTheDay,
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 holiday.start();
 
@@ -1027,12 +1027,12 @@ async function sendHistoricalEvent() {
 }
 
 const dar = new CronJob(
-    "00 00 10 * * *",
+    "00 50 11 * * *",
     function () {
         sendHistoricalEvent();
     },
     null,
     true,
-    "America/New_York"
+    "America/Sao_Paulo"
 );
 dar.start();
