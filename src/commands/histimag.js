@@ -89,15 +89,23 @@ const historicos = [
     },
 ];
 
+
 async function histimag(bot, message) {
     const historicoIndex = Math.floor(Math.random() * historicos.length);
     const historico = historicos[historicoIndex];
 
-    await bot.sendPhoto(message.chat.id, historico.imagem, {
-        caption: `<b>${historico.titulo}</b>`,
-        parse_mode: "HTML",
-        reply_to_message_id: message.message_id,
-    });
+    if (message.message_id) {
+        await bot.sendPhoto(message.chat.id, historico.imagem, {
+            caption: `<b>${historico.titulo}</b>`,
+            parse_mode: "HTML",
+            reply_to_message_id: message.message_id,
+        });
+    } else {
+        await bot.sendPhoto(message.chat.id, historico.imagem, {
+            caption: `<b>${historico.titulo}</b>`,
+            parse_mode: "HTML",
+        });
+    }
 }
 
 module.exports = {
