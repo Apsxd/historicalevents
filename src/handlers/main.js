@@ -650,17 +650,13 @@ async function sendHistoricalEventsUser(userId) {
             });
             console.log(`Message successfully sent to user ${userId}`);
         } catch (error) {
-            console.log(
-                `Error sending message to user ${userId}: ${error.message}`
-            );
+            console.log(`Error sending message to user ${userId}: ${error.message}`);
             if (error.response && error.response.statusCode === 403) {
                 await UserModel.findOneAndUpdate(
                     { user_id: userId },
                     { msg_private: false }
                 );
-                console.log(
-                    `User ${userId} has blocked the bot and been unsubscribed from private messages`
-                );
+                console.log(`User ${userId} has blocked the bot and been unsubscribed from private messages`);
             }
         }
     } else {
@@ -681,13 +677,18 @@ const userJob = new CronJob(
         const users = await UserModel.find({ msg_private: true });
         for (const user of users) {
             const userId = user.user_id;
-            await sendHistoricalEventsUser(userId);
+            try {
+                await sendHistoricalEventsUser(userId);
+            } catch (error) {
+                console.log(`Error processing user ${userId}: ${error.message}`);
+            }
         }
     },
     null,
     true,
     "America/Sao_Paulo"
 );
+
 
 userJob.start();
 
