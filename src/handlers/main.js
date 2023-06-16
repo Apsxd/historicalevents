@@ -899,7 +899,7 @@ async function getDeathsOfTheDay() {
 }
 
 const death = new CronJob(
-    "00 00 14 * * *",
+    "00 30 14 * * *",
     getDeathsOfTheDay,
     null,
     true,
@@ -952,7 +952,7 @@ async function getBirthsOfTheDay() {
 }
 
 const birth = new CronJob(
-    "00 00 18 * * *",
+    "00 00 19 * * *",
     getBirthsOfTheDay,
     null,
     true,
@@ -1007,7 +1007,7 @@ async function getHolidaysOfTheDay() {
 }
 
 const holiday = new CronJob(
-    "00 00 20 * * *",
+    "00 00 21 * * *",
     getHolidaysOfTheDay,
     null,
     true,
@@ -1044,7 +1044,7 @@ async function sendHistoricalEvent() {
 }
 
 const dar = new CronJob(
-    "00 00 11 * * *",
+    "00 00 12 * * *",
     function () {
         sendHistoricalEvent();
     },
