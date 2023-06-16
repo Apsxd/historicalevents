@@ -7,7 +7,6 @@ const translate = require("translate-google");
 const { ChatModel, UserModel } = require("../database");
 
 const { startCommand } = require("../commands/start");
-const { histimag } = require("../commands/histimag");
 const { helpCommand } = require("../commands/help");
 
 const groupId = process.env.groupId;
@@ -17,10 +16,6 @@ function is_dev(user_id) {
 }
 bot.onText(/^\/start$/, (message) => {
     startCommand(bot, message);
-});
-
-bot.onText(/^\/photoshist/, async (message) => {
-    await histimag(bot, message);
 });
 
 bot.onText(/^\/help/, (message) => {
