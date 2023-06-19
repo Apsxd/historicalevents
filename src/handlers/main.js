@@ -263,8 +263,8 @@ let day, month;
 
 async function getHistoricalEventsGroup(chatId) {
     const today = new Date();
-    day = today.getDate();
-    month = today.getMonth() + 1;
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
 
     try {
         const jsonEvents = require("./events.json");
@@ -301,6 +301,15 @@ async function getHistoricalEventsGroup(chatId) {
         }
     } catch (error) {
         console.error(`Error sending message to group ${chatId}:`, error);
+        if (error.response && error.response.statusCode === 403) {
+            await ChatModel.findOneAndUpdate(
+                { chatId: chatId },
+                { subscribed: false }
+            );
+            console.log(
+                `User ${chatId} has blocked the bot and has been unsubscribed from private messages`
+            );
+        }
     }
 }
 
@@ -325,6 +334,7 @@ const morningJob = new CronJob(
 );
 
 morningJob.start();
+
 
 
 const channelId = process.env.channelId;
