@@ -412,22 +412,11 @@ async function sendHistoricalEventsUser(userId) {
     }
 }
 
-const userJob = new CronJob(
-    "00 20 9 * * *",
-    async function () {
-        try {
-            const users = await UserModel.find({ msg_private: true });
-            for (const user of users) {
-                const userId = user.user_id;
-                try {
-                    await sendHistoricalEventsUser(userId);
-                } catch (error) {
-                    console.log(`Error processing user ${userId}: ${error.message}`);
-                }
-            }
-        } catch (error) {
-            console.error("Error retrieving user models:", error);
-        }
+const channelJob = new CronJob(
+    "00 00 6 * * *",
+    function () {
+        sendHistoricalEventsChannel(channelId);
+        console.log(`Message successfully sent to the channel ${channelId}`);
     },
     null,
     true,
