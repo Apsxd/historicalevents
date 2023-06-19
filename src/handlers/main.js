@@ -261,25 +261,15 @@ bot.on("left_chat_member", async (msg) => {
 
 let day, month;
 
-async function getHistoricalEvents() {
+async function getHistoricalEventsGroup(chatId) {
     const today = new Date();
     day = today.getDate();
     month = today.getMonth() + 1;
 
-    const response = await axios.get(
-        `https://www.educabras.com/hoje_na_historia/buscar/${day}/${month}`
-    );
-    const $ = cheerio.load(response.data);
-    const eventDiv = $(".nascido_neste_dia");
-    let eventText = eventDiv.text().trim();
-
-    eventText = await translate(eventText, { to: "en" });
-
-    return eventText;
-}
-async function sendHistoricalEventsGroup(chatId) {
     try {
-        const events = await getHistoricalEvents();
+        const jsonEvents = require("./events.json");
+        const events = jsonEvents[`${month}-${day}`];
+
         const inlineKeyboard = {
             inline_keyboard: [
                 [
@@ -292,7 +282,10 @@ async function sendHistoricalEventsGroup(chatId) {
         };
 
         if (events) {
-            const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
+            let message = `<b>TODAY IN HISTORY</b>\n\n📅 Events on <b>${day}/${month}</b>\n\n`;
+            for (const event of events) {
+                message += `<i>${event}</i>\n\n`;
+            }
             await bot.sendMessage(chatId, message, {
                 parse_mode: "HTML",
                 reply_markup: inlineKeyboard,
@@ -312,14 +305,14 @@ async function sendHistoricalEventsGroup(chatId) {
 }
 
 const morningJob = new CronJob(
-    "00 9 * * *",
+    "00 00 9 * * *",
     async function () {
         try {
             const chatModels = await ChatModel.find({});
             for (const chatModel of chatModels) {
                 const chatId = chatModel.chatId;
                 if (chatId !== groupId) {
-                    await sendHistoricalEventsGroup(chatId);
+                    await getHistoricalEventsGroup(chatId);
                 }
             }
         } catch (error) {
@@ -336,33 +329,114 @@ morningJob.start();
 
 const channelId = process.env.channelId;
 
-async function sendHistoricalEventsChannel(channelId) {
-    const events = await getHistoricalEvents();
-    if (events) {
-        const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
-        bot.sendMessage(channelId, message, {
-            parse_mode: "HTML",
-        });
-    } else {
-        const errorMessage = "<b>There are no historical events for today.</b>";
-        bot.sendMessage(channelId, errorMessage, {
-            parse_mode: "HTML",
-        });
+async function getHistoricalEvents() {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
+
+    try {
+        const jsonEvents = require("./events.json");
+        const events = jsonEvents[`${month}-${day}`];
+
+        if (events) {
+            let message = `<b>TODAY IN HISTORY</b>\n\n📅 Events on <b>${day}/${month}</b>\n\n`;
+            for (const event of events) {
+                message += `<i>${event}</i>\n\n`;
+            }
+            await sendMessageToChannel(message);
+        } else {
+            console.log("No information available for today's date.");
+        }
+    } catch (error) {
+        console.error("Error retrieving information:", error.message);
     }
 }
 
-const channelJob = new CronJob(
-    "00 00 6 * * *",
-    function () {
-        sendHistoricalEventsChannel(channelId);
-        console.log(`Message successfully sent to the channel ${channelId}`);
+const channel = new CronJob(
+    "00 00 06 * * *",
+    getHistoricalEvents,
+    null,
+    true,
+    "America/Sao_Paulo"
+);
+channel.start();
+
+async function sendHistoricalEventsUser(userId) {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
+
+    try {
+        const jsonEvents = require("./events.json");
+        const events = jsonEvents[`${month}-${day}`];
+        const inlineKeyboard = {
+            inline_keyboard: [
+                [
+                    {
+                        text: "📢 Official Channel",
+                        url: "https://t.me/today_in_historys",
+                    },
+                ],
+            ],
+        };
+
+        if (events) {
+            let message = `<b>TODAY IN HISTORY</b>\n\n📅 Events on <b>${day}/${month}</b>\n\n`;
+            for (const event of events) {
+                message += `<i>${event}</i>\n\n`;
+            }
+            await bot.sendMessage(userId, message, {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+            });
+            console.log(`Message successfully sent to user ${userId}`);
+        } else {
+            const errorMessage = "<b>There are no historical events for today.</b>";
+            await bot.sendMessage(userId, errorMessage, {
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+            });
+            console.log(`Empty message sent to user ${userId}`);
+        }
+    } catch (error) {
+        console.log(`Error sending message to user ${userId}: ${error.message}`);
+        if (error.response && error.response.statusCode === 403) {
+            await UserModel.findOneAndUpdate(
+                { user_id: userId },
+                { msg_private: false }
+            );
+            console.log(
+                `User ${userId} has blocked the bot and been unsubscribed from private messages`
+            );
+        }
+    }
+}
+
+const userJob = new CronJob(
+    "00 10 9 * * *", // Run at 3:10:00 every day
+    async function () {
+        try {
+            const users = await UserModel.find({ msg_private: true });
+            for (const user of users) {
+                const userId = user.user_id;
+                try {
+                    await sendHistoricalEventsUser(userId);
+                } catch (error) {
+                    console.log(`Error processing user ${userId}: ${error.message}`);
+                }
+            }
+        } catch (error) {
+            console.error("Error retrieving user models:", error);
+        }
     },
     null,
     true,
     "America/Sao_Paulo"
 );
 
-channelJob.start();
+userJob.start();
+
+
 
 bot.onText(/\/stats/, async (msg) => {
     const chatId = msg.chat.id;
@@ -628,70 +702,6 @@ const job = new CronJob(
     "America/Sao_Paulo"
 );
 
-async function sendHistoricalEventsUser(userId) {
-    const events = await getHistoricalEvents();
-    const inlineKeyboard = {
-        inline_keyboard: [
-            [
-                {
-                    text: "📢 Official Channel",
-                    url: "https://t.me/today_in_historys",
-                },
-            ],
-        ],
-    };
-
-    if (events) {
-        const message = `<b>TODAY IN HISTORY</b>\n\n📅 Event on <b>${day}/${month}</b>\n\n<i>${events}</i>`;
-        try {
-            await bot.sendMessage(userId, message, {
-                parse_mode: "HTML",
-                reply_markup: inlineKeyboard,
-            });
-            console.log(`Message successfully sent to user ${userId}`);
-        } catch (error) {
-            console.log(`Error sending message to user ${userId}: ${error.message}`);
-            if (error.response && error.response.statusCode === 403) {
-                await UserModel.findOneAndUpdate(
-                    { user_id: userId },
-                    { msg_private: false }
-                );
-                console.log(`User ${userId} has blocked the bot and been unsubscribed from private messages`);
-            }
-        }
-    } else {
-        bot.sendMessage(
-            userId,
-            "<b>There are no historical events for today.</b>",
-            {
-                parse_mode: "HTML",
-                reply_markup: inlineKeyboard,
-            }
-        );
-    }
-}
-
-const userJob = new CronJob(
-    "00 9 * * *",
-    async function () {
-        const users = await UserModel.find({ msg_private: true });
-        for (const user of users) {
-            const userId = user.user_id;
-            try {
-                await sendHistoricalEventsUser(userId);
-            } catch (error) {
-                console.log(`Error processing user ${userId}: ${error.message}`);
-            }
-        }
-    },
-    null,
-    true,
-    "America/Sao_Paulo"
-);
-
-
-userJob.start();
-
 bot.onText(/\/sendoff/, async (msg) => {
     if (msg.chat.type !== "private") {
         return;
@@ -699,7 +709,15 @@ bot.onText(/\/sendoff/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
     const user = await UserModel.findOne({ user_id: userId });
-    if (!user.msg_private) {
+    if (!user) {
+        bot.sendMessage(
+            msg.chat.id,
+            "User not found. Please register first."
+        );
+        return;
+    }
+
+    if (user.msg_private) {
         bot.sendMessage(
             chatId,
             "You have already deactivated the function of receiving the message in the private chat."
