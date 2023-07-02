@@ -1057,12 +1057,9 @@ async function sendHistoricalEvent() {
         const event = events[randomIndex];
 
         const caption = event.text;
-
         if (event.pages && event.pages[0].thumbnail) {
             const photoUrl = event.pages[0].thumbnail.source;
             await bot.sendPhoto(channelId, photoUrl, { caption });
-        } else {
-            await bot.sendMessage(channelId, caption);
         }
 
         console.log("Historical event sent successfully.");
@@ -1081,3 +1078,25 @@ const dar = new CronJob(
     "America/Sao_Paulo"
 );
 dar.start();
+
+const tas = new CronJob(
+    "00 00 08 * * *",
+    function () {
+        sendHistoricalEvent();
+    },
+    null,
+    true,
+    "America/Sao_Paulo"
+);
+tas.start();
+
+const fars = new CronJob(
+    "00 00 15 * * *",
+    function () {
+        sendHistoricalEvent();
+    },
+    null,
+    true,
+    "America/Sao_Paulo"
+);
+fars.start();
