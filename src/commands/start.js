@@ -18,8 +18,8 @@ function startCommand(bot, message) {
                 ],
                 [
                     {
-                        text: "👾 Stickers Channel",
-                        url: "https://t.me/lbrabo",
+                        text: "⚙️ Bot updates",
+                        url: "https://t.me/updatehist",
                     },
                     {
                         text: "💰 Make a donation",
