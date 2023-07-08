@@ -22,8 +22,13 @@
             "value": "",
             "required": true
         },
-        "DEV_USERS": {
-            "description": "Developers id ",
+        "ownerId": {
+            "description": "owner id Telegram",
+            "value": "",
+            "required": true
+        },
+        "channelStatusId": {
+            "description": "Channel ID post Telegram Status.",
             "value": "",
             "required": true
         },
