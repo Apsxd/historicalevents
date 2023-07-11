@@ -472,7 +472,7 @@ async function sendHistoricalEventsUser(userId) {
     const month = today.getMonth() + 1;
 
     try {
-        const jsonEvents = require("./events.json");
+        const jsonEvents = require("../collections/events.json");
         const events = jsonEvents[`${month}-${day}`];
         const inlineKeyboard = {
             inline_keyboard: [
