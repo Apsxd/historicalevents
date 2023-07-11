@@ -440,7 +440,7 @@ async function getHistoricalEvents() {
     const month = today.getMonth() + 1;
 
     try {
-        const jsonEvents = require("./events.json");
+        const jsonEvents = require("../collections/events.json");
         const events = jsonEvents[`${month}-${day}`];
 
         if (events) {
