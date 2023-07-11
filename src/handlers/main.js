@@ -518,7 +518,7 @@ async function sendHistoricalEventsUser(userId) {
 }
 
 const userJob = new CronJob(
-    "00 18 10 * * *",
+    "00 20 09 * * *",
     async function () {
         try {
             const users = await UserModel.find({ msg_private: true });
