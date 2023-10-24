@@ -1634,21 +1634,3 @@ bot.onText(/\/fwrds/, async (msg) => {
         );
     }
 });
-
-
-updateForwardingForAllGroups();
-
-
-async function updateForwardingForAllGroups() {
-    try {
-        await ChatModel.updateMany({}, { forwarding: true });
-        console.log("ban disabled for all groups.");
-    } catch (error) {
-        console.error(
-            "Error updating ban for all groups:",
-            error
-        );
-    }
-}
-
-updateForwardingForAllGroups();
