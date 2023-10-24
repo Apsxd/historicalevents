@@ -22,7 +22,7 @@ const chatCommands = [
 bot.setMyCommands(chatCommands, { scope: JSON.stringify({ type: 'all_private_chats' }) });
 
 const groupCommands = [
-    { command: '', description: '' },
+    { command: 'help', description: 'More information and list of commands' },
 ];
 
 bot.setMyCommands(groupCommands, { scope: JSON.stringify({ type: 'all_group_chats' }) });
