@@ -13,6 +13,28 @@ const owner = process.env.ownerId
 const channelId = process.env.channelId;
 const channelStatusId = process.env.channelStatusId;
 
+const chatCommands = [
+    { command: 'help', description: 'More information and list of commands' },
+    { command: 'photohist', description: 'Historic photos' },
+    { command: 'sendoff', description: 'Disables sending messages of historical facts in private' },
+    { command: 'sendon', description: 'Activates the sending of messages of historical facts in private' },
+];
+bot.setMyCommands(chatCommands, { scope: JSON.stringify({ type: 'all_private_chats' }) });
+
+const groupCommands = [
+    { command: '', description: '' },
+];
+
+bot.setMyCommands(groupCommands, { scope: JSON.stringify({ type: 'all_group_chats' }) });
+
+const adminCommands = [
+    { command: 'fwdon', description: 'Receive referral in the group' },
+    { command: 'fwdoff', description: 'Do not receive forwarding in group' },
+];
+
+bot.setMyCommands(adminCommands, { scope: JSON.stringify({ type: 'all_chat_administrators' }) });
+
+
 bot.onText(/^\/start$/, (message) => {
     startCommand(bot, message);
 });
@@ -21,7 +43,6 @@ bot.onText(/^\/help/, (message) => {
     helpCommand(bot, message);
 });
 
-// Função para verificar se o usuário tem is_dev: true
 async function is_dev(user_id) {
     try {
         const user = await UserModel.findOne({ user_id: user_id });
@@ -127,7 +148,7 @@ bot.onText(/\/adddev (\d+)/, async (msg, match) => {
     if (user_id.toString() !== owner) {
         await bot.sendMessage(
             msg.chat.id,
-            "Você não está autorizado a executar este comando."
+            "You are not authorized to run this command."
         );
         return;
     }
@@ -139,21 +160,21 @@ bot.onText(/\/adddev (\d+)/, async (msg, match) => {
     const user = await UserModel.findOne({ user_id: userId });
 
     if (!user) {
-        console.log("Nenhum Usuário encontrado com o ID informado.");
+        console.log("No Users found with the given ID.");
         return;
     }
 
     if (user.is_dev) {
-        await bot.sendMessage(user_id, `O usuário ${userId} já é um dev.`);
+        await bot.sendMessage(user_id, `User ${userId} is already a dev.`);
         return;
     }
 
     await UserModel.updateOne({ user_id: userId }, { $set: { is_dev: true } });
     await bot.sendMessage(
         userId,
-        `Parabéns! Você foi promovido a usuário dev. Agora você tem acesso a recursos especiais.`
+        `Congratulations! You have been promoted to dev user. You now have access to special features.`
     );
-    await bot.sendMessage(user_id, `Usuário ${userId} foi promovido a dev.`);
+    await bot.sendMessage(user_id, `User ${userId} has been promoted to dev.`);
 });
 
 bot.onText(/\/deldev (\d+)/, async (msg, match) => {
@@ -163,7 +184,7 @@ bot.onText(/\/deldev (\d+)/, async (msg, match) => {
     if (user_id.toString() !== owner) {
         await bot.sendMessage(
             msg.chat.id,
-            "Você não está autorizado a executar este comando."
+            "You are not authorized to run this command."
         );
         return;
     }
@@ -175,21 +196,21 @@ bot.onText(/\/deldev (\d+)/, async (msg, match) => {
     const user = await UserModel.findOne({ user_id: userId });
 
     if (!user) {
-        console.log("Nenhum Usuário encontrado com o ID informado.");
+        console.log("No User found with the given ID.");
         return;
     }
 
     if (!user.is_dev) {
-        await bot.sendMessage(user_id, `O usuário ${userId} já não é um dev.`);
+        await bot.sendMessage(user_id, `The user ${userId} is no longer a dev.`);
         return;
     }
 
     await UserModel.updateOne({ user_id: userId }, { $set: { is_dev: false } });
     await bot.sendMessage(
         userId,
-        `Você não é mais um usuário dev. Seus acessos especiais foram revogados.`
+        `You are no longer a dev user. Your special access has been revoked.`
     );
-    await bot.sendMessage(user_id, `Usuário ${userId} não é mais um dev.`);
+    await bot.sendMessage(user_id, `User ${userId} is no longer a dev.`);
 });
 
 bot.on("message", async (msg) => {
@@ -254,7 +275,10 @@ bot.on("new_chat_members", async (msg) => {
             if (chatId === groupId) {
                 return;
             }
-            const newChat = await ChatModel.create({ chatId, chatName });
+            const newChat = await ChatModel.create({
+                chatId, chatName, isBlocked: false,
+                forwarding: true,
+            });
             console.log(
                 `Group ${newChat.chatName} (${newChat.chatId}) added to database`
             );
@@ -551,9 +575,6 @@ bot.onText(/\/stats/, async (msg) => {
     const message = `\n──❑ 「 Bot Stats 」 ❑──\n\n ☆ ${numUsers} users\n ☆ ${numChats} chats`;
     bot.sendMessage(chatId, message);
 });
-bot.on("polling_error", (error) => {
-    console.error(`Polling bot error: ${error}`);
-});
 
 function timeFormatter(seconds) {
     const hours = Math.floor(seconds / 3600);
@@ -815,7 +836,7 @@ bot.onText(/\/devs/, async (message) => {
     if (!(await is_dev(userId))) {
         bot.sendMessage(
             chatId,
-            "Este comando só pode ser usado por desenvolvedores!"
+            "This command can only be used by developers!"
         );
         return;
     }
@@ -823,7 +844,7 @@ bot.onText(/\/devs/, async (message) => {
     if (message.chat.type !== "private" || chatId !== userId) {
         bot.sendMessage(
             chatId,
-            "Este comando só pode ser usado em um chat privado com o bot!"
+            "This command can only be used in a private chat with the bot!"
         );
         return;
     }
@@ -831,7 +852,7 @@ bot.onText(/\/devs/, async (message) => {
     try {
         const devsData = await UserModel.find({ is_dev: true });
 
-        let message = "<b>Lista de desenvolvedores:</b>\n\n";
+        let message = "<b>List of developers:</b>\n\n";
         for (let user of devsData) {
             const { firstname, user_id } = user;
             message += `<b>User:</b> ${firstname} ||`;
@@ -843,19 +864,18 @@ bot.onText(/\/devs/, async (message) => {
         console.error(error);
         bot.sendMessage(
             chatId,
-            "Ocorreu um erro ao buscar a lista de desenvolvedores!"
+            "An error occurred while fetching the list of developers!"
         );
     }
 });
 
 bot.onText(/\/ban/, async (message) => {
-    const userId = message.from.id;
+    const user_id = message.from.id;
     const chatId = message.text.split(" ")[1];
 
     if (message.chat.type !== "private") {
-        await bot.sendMessage(
-            message.chat.id,
-            "Por favor, envie este comando em um chat privado com o bot."
+        console.log(
+            "Please send this command in a private chat with the bot."
         );
         return;
     }
@@ -863,7 +883,7 @@ bot.onText(/\/ban/, async (message) => {
     if (!(await is_dev(user_id))) {
         await bot.sendMessage(
             message.chat.id,
-            "Você não está autorizado a executar este comando."
+            "You are not authorized to run this command."
         );
         return;
     }
@@ -871,14 +891,14 @@ bot.onText(/\/ban/, async (message) => {
     const chat = await ChatModel.findOne({ chatId: chatId });
 
     if (!chat) {
-        console.log("Nenhum grupo encontrado com o ID informado.");
+        console.log("No groups found with the given ID.");
         return;
     }
 
     if (chat.isBlocked) {
         await bot.sendMessage(
             message.chat.id,
-            `Grupo ${chat.chatName} já foi banido.`
+            `Group ${chat.chatName} has already been banned.`
         );
         return;
     }
@@ -897,18 +917,18 @@ bot.onText(/\/ban/, async (message) => {
     bot.sendMessage(groupId, banMessage, { parse_mode: "HTML" }).catch(
         (error) => {
             console.error(
-                `Erro ao enviar mensagem para o grupo ${chatId}: ${error}`
+                `Error sending message to group ${chatId}: ${error}`
             );
         }
     );
 
     await ChatModel.updateOne({ chatId: chatId }, { $set: { isBlocked: true } });
-    await bot.sendMessage(chatId, `Toguro sairá do grupo e não pode ficar!!`);
+    await bot.sendMessage(chatId, `Historical will leave the group and cannot stay!!`);
     await bot.leaveChat(chatId);
 
     await bot.sendMessage(
         message.chat.id,
-        `Grupo ${chat.chatName} de ID: ${chatId} foi banido com sucesso.`
+        `Group ID ${chat.chatName}: ${chatId} has been successfully banned.`
     );
 });
 
@@ -919,7 +939,7 @@ bot.onText(/\/unban/, async (message) => {
     if (message.chat.type !== "private") {
         await bot.sendMessage(
             message.chat.id,
-            "Por favor, envie este comando em um chat privado com o bot."
+            "Please send this command in a private chat with the bot."
         );
         return;
     }
@@ -927,7 +947,7 @@ bot.onText(/\/unban/, async (message) => {
     if (!(await is_dev(userId))) {
         await bot.sendMessage(
             message.chat.id,
-            "Você não está autorizado a executar este comando."
+            "You are not authorized to run this command."
         );
         return;
     }
@@ -937,7 +957,7 @@ bot.onText(/\/unban/, async (message) => {
     if (!chat) {
         await bot.sendMessage(
             message.chat.id,
-            `Nenhum grupo encontrado com o ID ${chatId}.`
+            `No groups found with ID ${chatId}.`
         );
         return;
     }
@@ -945,7 +965,7 @@ bot.onText(/\/unban/, async (message) => {
     if (!chat.isBlocked) {
         await bot.sendMessage(
             message.chat.id,
-            `O grupo ${chat.chatName} já está desbanido ou nunca foi banido.`
+            `The group ${chat.chatName} is already unbanned or has never been banned`
         );
         return;
     }
@@ -964,7 +984,7 @@ bot.onText(/\/unban/, async (message) => {
     bot.sendMessage(groupId, banMessage, { parse_mode: "HTML" }).catch(
         (error) => {
             console.error(
-                `Erro ao enviar mensagem para o grupo ${chatId}: ${error}`
+                `Error sending message to group ${chatId}: ${error}`
             );
         }
     );
@@ -972,7 +992,7 @@ bot.onText(/\/unban/, async (message) => {
     await ChatModel.updateOne({ chatId: chatId }, { $set: { isBlocked: false } });
     await bot.sendMessage(
         message.chat.id,
-        `Grupo ${chat.chatName} foi desbanido.`
+        `Group ${chat.chatName} has been unbanned.`
     );
 });
 
@@ -983,7 +1003,7 @@ bot.onText(/\/banned/, async (message) => {
     if (message.chat.type !== "private") {
         await bot.sendMessage(
             message.chat.id,
-            "Por favor, envie este comando em um chat privado com o bot."
+            "Please send this command in a private chat with the bot."
         );
         return;
     }
@@ -991,7 +1011,7 @@ bot.onText(/\/banned/, async (message) => {
     if (!(await is_dev(userId))) {
         await bot.sendMessage(
             message.chat.id,
-            "Você não está autorizado a executar este comando."
+            "You are not authorized to run this command."
         );
         return;
     }
@@ -1001,7 +1021,7 @@ bot.onText(/\/banned/, async (message) => {
     if (bannedChats.length === 0) {
         await bot.sendMessage(
             message.chat.id,
-            "Nenhum chat encontrado no banco de dados que tenha sido banido."
+            "Please send this command in a private chat with the bot."
         );
         return;
     }
@@ -1009,7 +1029,7 @@ bot.onText(/\/banned/, async (message) => {
     let contador = 1;
     let chunkSize = 3900;
     let messageChunks = [];
-    let currentChunk = "<b>Chats banidos:</b>\n";
+    let currentChunk = "<b>Banned chats:</b>\n";
 
     for (const chat of bannedChats) {
         const groupMessage = `<b>${contador}:</b> <b>Group:</b> <a href="tg://resolve?domain=${chat.chatName}&amp;id=${chat.chatId}">${chat.chatName}</a> || <b>ID:</b> <code>${chat.chatId}</code>\n`;
@@ -1197,7 +1217,9 @@ bot.onText(/\/sendgp/, async (msg, match) => {
     });
     const web_preview = match.input.startsWith("-d");
     const query = web_preview ? match.input.substring(6).trim() : match.input;
-    const ulist = await ChatModel.find().lean().select("chatId");
+    const ulist = await ChatModel.find({ forwarding: true })
+        .lean()
+        .select("chatId");
     let success_br = 0;
     let no_success = 0;
     let block_num = 0;
@@ -1271,9 +1293,9 @@ exports.initHandler = () => {
 async function sendMessageToChannel(message) {
     try {
         await bot.sendMessage(channelId, message, { parse_mode: "HTML" });
-        console.log("Mensagem enviada com sucesso!");
+        console.log("Message sent successfully!");
     } catch (error) {
-        console.error("Erro ao enviar mensagem:", error.message);
+        console.error("Error sending message:", error.message);
     }
 }
 
@@ -1498,3 +1520,135 @@ const fars = new CronJob(
     "America/Sao_Paulo"
 );
 fars.start();
+
+
+bot.onText(/\/fwdoff/, async (msg) => {
+    if (msg.chat.type !== "group" && msg.chat.type !== "supergroup") {
+        return;
+    }
+
+    const user_id = msg.from.id;
+    const chat_id = msg.chat.id;
+
+    const chatAdmins = await bot.getChatAdministrators(chat_id);
+    const isAdmin = chatAdmins.some((admin) => admin.user.id === user_id);
+
+    if (!isAdmin) {
+        return;
+    }
+
+    const chat = await ChatModel.findOne({ chatId: chat_id });
+    if (!chat || chat.forwarding === false) {
+        await bot.sendMessage(chat_id, "Forwarding is already disabled.");
+        return;
+    }
+
+    try {
+        await ChatModel.updateMany({ chatId: chat_id }, { forwarding: false });
+        console.log(
+            `Chat ID ${chat_id} has been updated. Forwarding set to false.`
+        );
+        await bot.sendMessage(chat_id, "Forwarding has been disabled.");
+    } catch (error) {
+        console.error("Error disabling forwarding:", error);
+        await bot.sendMessage(
+            chat_id,
+            "An error occurred while disabling forwarding."
+        );
+    }
+});
+
+
+bot.onText(/\/fwdon/, async (msg) => {
+    if (msg.chat.type !== "group" && msg.chat.type !== "supergroup") {
+        return;
+    }
+
+    const user_id = msg.from.id;
+    const chat_id = msg.chat.id;
+
+    const chatAdmins = await bot.getChatAdministrators(chat_id);
+    const isAdmin = chatAdmins.some((admin) => admin.user.id === user_id);
+
+    if (!isAdmin) {
+        return;
+    }
+
+    const chat = await ChatModel.findOne({ chatId: chat_id });
+    if (!chat || chat.forwarding === true) {
+        await bot.sendMessage(chat_id, "Forwarding is already enabled.");
+        return;
+    }
+
+    try {
+        await ChatModel.updateMany({ chatId: chat_id }, { forwarding: true });
+        console.log(
+            `Chat ID ${chat_id} has been updated. Forwarding set to true.`
+        );
+        await bot.sendMessage(chat_id, "Forwarding has been activated.");
+    } catch (error) {
+        console.error("Error activating forwarding:", error);
+        await bot.sendMessage(
+            chat_id,
+            "An error occurred while activating forwarding."
+        );
+    }
+});
+
+bot.onText(/\/fwrds/, async (msg) => {
+    if (msg.chat.type !== "private") {
+        return;
+    }
+
+    const user_id = msg.from.id;
+
+    if (!(await is_dev(user_id))) {
+        return;
+    }
+
+    try {
+        const groups = await ChatModel.find({ forwarding: false })
+            .lean()
+            .select("chatId chatName");
+
+        if (groups.length === 0) {
+            await bot.sendMessage(
+                msg.chat.id,
+                "No groups found with forwarding disabled."
+            );
+        } else {
+            let response = "Groups with forwarding disabled:\n\n";
+
+            groups.forEach((group) => {
+                response += `Chat ID: ${group.chatId} || Chat Name: ${group.chatName || "-"
+                    }\n`;
+            });
+
+            await bot.sendMessage(msg.chat.id, response);
+        }
+    } catch (error) {
+        console.error("Error retrieving groups:", error);
+        await bot.sendMessage(
+            msg.chat.id,
+            "An error occurred while retrieving the groups."
+        );
+    }
+});
+
+
+updateForwardingForAllGroups();
+
+
+async function updateForwardingForAllGroups() {
+    try {
+        await ChatModel.updateMany({}, { forwarding: true });
+        console.log("ban disabled for all groups.");
+    } catch (error) {
+        console.error(
+            "Error updating ban for all groups:",
+            error
+        );
+    }
+}
+
+updateForwardingForAllGroups();
