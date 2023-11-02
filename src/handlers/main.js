@@ -267,7 +267,7 @@ bot.on("new_chat_members", async (msg) => {
             console.log(
                 `Group ${chatName} (${chatId}) already exists in the database`
             );
-        } else if (chatId === groupId) {
+        } else if (chatId === parseFloat(groupId)) {
             console.log(
                 `The chatId ${chatId} is equal to groupId ${groupId}. It will not be saved in the database.`
             );
