@@ -1779,24 +1779,6 @@ const tardJob = new CronJob(
 );
 tardJob.start();
 
-async function adicionarThreadIdVazioParaChats() {
-    try {
-        const chats = await ChatModel.find({});
-
-        for (const chat of chats) {
-            if (!chat.thread_id) {
-                chat.thread_id = ''; 
-                await chat.save(); 
-            }
-        }
-
-        console.log('Empty thread_id has been added for all chats if needed.');
-    } catch (error) {
-        console.error('Error adding empty thread_id for chats:', error);
-    }
-}
-
-adicionarThreadIdVazioParaChats();
 
 function sendBotOnlineMessage() {
     console.log(`Historical Events started successfully...`);
