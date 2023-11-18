@@ -43,6 +43,73 @@ bot.onText(/^\/help/, (message) => {
     helpCommand(bot, message);
 });
 
+bot.onText(/\/settopic/, async (msg) => {
+    if (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') {
+        await bot.sendMessage(msg.chat.id, 'Esse comando só pode ser enviado em grupos.');
+        return;
+    }
+    const chatId = msg.chat.id;
+    const threadId = msg.reply_to_message?.message_thread_id;
+    const chatMember = await bot.getChatMember(chatId, msg.from.id);
+
+    if (chatMember.status !== 'administrator' && chatMember.status !== 'creator') {
+        return;
+    }
+
+    try {
+        const chat = await ChatModel.findOne({ chatId });
+
+        if (chat) {
+            if (threadId === "1" || !threadId) {
+                chat.thread_id = null;
+                await chat.save();
+                bot.sendMessage(chatId, "Será enviado as mensagens aqui!", { message_thread_id: chat.thread_id });
+            } else if (chat.thread_id === threadId) {
+                bot.sendMessage(chatId, `Este chat já está definido para receber mensagens do tópico ${threadId}.`, { message_thread_id: chat.thread_id });
+            } else {
+                chat.thread_id = threadId;
+                await chat.save();
+                bot.sendMessage(chatId, `Thread ID atualizado para: ${threadId}, agora você receberá as mensagens históricas aqui!`, { message_thread_id: threadId });
+            }
+        } else {
+            const newChat = new ChatModel({ chatId, thread_id: threadId });
+            await newChat.save();
+            bot.sendMessage(chatId, `Thread ID definido como: ${threadId}, agora você receberá as mensagens históricas aqui!`, { message_thread_id: threadId });
+        }
+    } catch (error) {
+        console.error("Error setting thread ID:", error.message);
+    }
+});
+
+bot.onText(/\/cleartopic/, async (msg) => {
+    if (msg.chat.type !== 'group' && msg.chat.type !== 'supergroup') {
+        await bot.sendMessage(msg.chat.id, 'Esse comando só pode ser enviado em grupos.');
+        return;
+    }
+
+    const chatId = msg.chat.id;
+    const chatMember = await bot.getChatMember(chatId, msg.from.id);
+
+    if (chatMember.status !== 'administrator' && chatMember.status !== 'creator') {
+        return;
+    }
+
+    try {
+        const chat = await ChatModel.findOne({ chatId });
+
+        if (chat) {
+            chat.thread_id = null;
+            await chat.save();
+            bot.sendMessage(chatId, "O tópico foi removido com sucesso. Você não receberá mais mensagens históricas aqui.");
+        } else {
+            bot.sendMessage(chatId, "Você ainda não definiu um tópico. Use o comando /settopic para definir um tópico.");
+        }
+    } catch (error) {
+        console.error("Error clearing thread ID:", error.message);
+    }
+});
+
+
 async function is_dev(user_id) {
     try {
         const user = await UserModel.findOne({ user_id: user_id });
@@ -385,6 +452,7 @@ async function getHistoricalEventsGroup(chatId) {
     const today = new Date();
     const day = today.getDate();
     const month = today.getMonth() + 1;
+    const topic = chat.thread_id;
 
     try {
         const jsonEvents = require("../collections/events.json");
@@ -409,6 +477,7 @@ async function getHistoricalEventsGroup(chatId) {
             await bot.sendMessage(chatId, message, {
                 parse_mode: "HTML",
                 reply_markup: inlineKeyboard,
+                message_thread_id: topic,
             });
             console.log(`Message sent successfully to group ${chatId}`);
         } else {
@@ -416,6 +485,7 @@ async function getHistoricalEventsGroup(chatId) {
             await bot.sendMessage(chatId, errorMessage, {
                 parse_mode: "HTML",
                 reply_markup: inlineKeyboard,
+                message_thread_id: topic,
             });
             console.log(`Empty message sent to group ${chatId}`);
         }
@@ -1635,21 +1705,113 @@ bot.onText(/\/fwrds/, async (msg) => {
     }
 });
 
+async function sendHistoricalEventsGroupImage(chatId) {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
+    const inlineKeyboard = {
+        inline_keyboard: [
+            [
+                {
+                    text: "📢 Official Channel",
+                    url: "https://t.me/today_in_historys",
+                },
+            ],
+        ],
+    };
+
+    try {
+        const response = await axios.get(
+            `https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`
+        );
+        const events = response.data.events;
+
+        const randomIndex = Math.floor(Math.random() * events.length);
+        const event = events[randomIndex];
+        const chat = await ChatModel.findOne({ chatId });
+        const topic = chat.thread_id;
+
+        const caption = `<b>Did you know?</b>\n\n<code>${event.text}</code>`;
+
+        if (event.pages && event.pages[0].thumbnail) {
+            const photoUrl = event.pages[0].thumbnail.source;
+            await bot.sendPhoto(chatId, photoUrl, {
+                caption,
+                parse_mode: "HTML",
+                reply_markup: inlineKeyboard,
+                message_thread_id: topic,
+            });
+        } else {
+            await bot.sendMessage(chatId, caption, { parse_mode: "HTML", reply_markup: inlineKeyboard, message_thread_id: topic, });
+        }
+
+        console.log(`Historical event sent successfully to chatID ${chatId}.`);
+    } catch (error) {
+        if (error.code === "ETELEGRAM" && error.response?.statusCode === 400) {
+            console.error(
+                `Error sending historical event to chat ${chatId}: not enough rights to send text messages to the chat`
+            );
+        } else {
+            console.error("Failed to send historical event:", error);
+        }
+    }
+}
+
+const tardJob = new CronJob(
+    "00 16 * * *",
+    async function () {
+        const chatModels = await ChatModel.find({ forwarding: true });
+        for (const chatModel of chatModels) {
+            const chatId = chatModel.chatId;
+            if (chatId !== groupId) {
+                try {
+                    await sendHistoricalEventsGroupImage(chatId);
+                    console.log(`Message sent successfully to chatID ${chatId}`);
+                } catch (error) {
+                    console.error(`Error sending historical events to chat ${chatId}:`, error);
+                }
+            }
+        }
+    },
+    null,
+    true,
+    "America/Sao_Paulo"
+);
+tardJob.start();
+
+async function adicionarThreadIdVazioParaChats() {
+    try {
+        const chats = await ChatModel.find({});
+
+        for (const chat of chats) {
+            if (!chat.thread_id) {
+                chat.thread_id = ''; 
+                await chat.save(); 
+            }
+        }
+
+        console.log('Empty thread_id has been added for all chats if needed.');
+    } catch (error) {
+        console.error('Error adding empty thread_id for chats:', error);
+    }
+}
+
+adicionarThreadIdVazioParaChats();
 
 function sendBotOnlineMessage() {
-    console.log(`HistoricalEvents iniciado com sucesso...`);
+    console.log(`Historical Events started successfully...`);
     bot.sendMessage(groupId, `#HistoricalEvents #ONLINE\n\nBot is now playing ...`);
 }
 
 function sendBotOfflineMessage() {
-    console.log(`HistoricalEvents encerrado com sucesso...`);
+    console.log(`Historical Events ended successfully...`);
     bot.sendMessage(groupId, `#HistoricalEvents #OFFLINE\n\nBot is now off ...`)
         .then(() => {
-            process.exit(0); // Encerra o processo do bot após enviar a mensagem offline
+            process.exit(0); 
         })
         .catch((error) => {
-            console.error("Erro ao enviar mensagem de desligamento:", error);
-            process.exit(1); // Encerra o processo com um código de erro
+            console.error("Error sending shutdown message:", error);
+            process.exit(1); 
         });
 }
 
