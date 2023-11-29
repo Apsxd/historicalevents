@@ -11,13 +11,13 @@ function helpCommand(bot, message) {
             inline_keyboard: [
                 [
                     {
-                        text: "Command List",
+                        text: "⁉️How to use / Command List",
                         callback_data: "commands",
                     },
                 ],
                 [
-                    { text: "Projects", url: "https://t.me/pjtlbrabo" },
-                    { text: "Support", url: "https://t.me/kylorensbot" },
+                    { text: "Group", url: "https://t.me/X1botchat" },
+                    { text: "Support", url: "https://t.me/X1_Bots" },
                 ],
             ],
         },
