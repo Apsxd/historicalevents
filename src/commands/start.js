@@ -12,24 +12,24 @@ function startCommand(bot, message) {
             inline_keyboard: [
                 [
                     {
-                        text: "✨ Add me in your group",
-                        url: "https://t.me/fatoshistbot?startgroup=true",
+                        text: "➕Add me in your group➕",
+                        url: "https://t.me/EventsPostbot?startgroup=true",
                     },
                 ],
                 [
                     {
-                        text: "⚙️ Bot updates",
+                        text: "⚙️Bot updates",
                         url: "https://t.me/updatehist",
                     },
                     {
-                        text: "💰 Make a donation",
+                        text: "❕Donate source Owner",
                         callback_data: "donate",
                     },
                 ],
                 [
                     {
-                        text: "Official Channel 🇺🇸",
-                        url: "https://t.me/today_in_historys",
+                        text: "❔Support group",
+                        url: "https://t.me/x1botchat",
                     },
                 ],
             ],
